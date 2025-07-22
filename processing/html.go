@@ -26,7 +26,7 @@ func NewHtml(config config.Config, logger zerolog.Logger) *Html {
 
 func (h *Html) Execute(filePath string) {
 	start := time.Now()
-	h.logger.Printf("Начало обработки файла: %s", filePath)
+	h.logger.Printf("Start file processing: %s", filePath)
 
 	// Создаем контекст для удаленного Chrome
 	allocCtx, cancel := chromedp.NewRemoteAllocator(context.Background(),
@@ -38,9 +38,8 @@ func (h *Html) Execute(filePath string) {
 
 	var buf []byte
 	// Преобразуем путь к формату внутри контейнера
-	inContainerPath := filepath.Join("/watchdir", filepath.Base(filePath))
+	inContainerPath := filepath.Join(h.config.WatchDir, filepath.Base(filePath))
 	localURL := "file://" + filepath.ToSlash(inContainerPath)
-	h.logger.Info().Msgf("Открываем локальный файл: %s", localURL)
 
 	// Устанавливаем таймаут
 	ctx, cancel = context.WithTimeout(ctx, 60*time.Second)
@@ -48,19 +47,19 @@ func (h *Html) Execute(filePath string) {
 
 	// Делаем скриншот
 	if err := chromedp.Run(ctx, h.fullScreenshot(localURL, 90, &buf)); err != nil {
-		h.logger.Error().Err(err).Msg("Ошибка при создании скриншота")
+		h.logger.Error().Err(err).Msg("Screenshot creating error")
 	}
 
 	if len(buf) == 0 {
-		h.logger.Error().Msg("Скриншот не содержит данных")
+		h.logger.Error().Msg("Screenshot empty")
 	}
 
 	outputPath := filepath.Join(filepath.Dir(filePath), "screenshot.png")
 	if err := os.WriteFile(outputPath, buf, 0644); err != nil {
-		h.logger.Error().Err(err).Msg("Ошибка сохранения скриншота")
+		h.logger.Error().Err(err).Msg("Screenshot saving error")
 	}
 
-	h.logger.Info().Msgf("Файл обработан: %s (время: %v)",
+	h.logger.Info().Msgf("File has been processed: %s (time: %v)",
 		filepath.Base(filePath), time.Since(start))
 }
 

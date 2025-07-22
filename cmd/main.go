@@ -16,13 +16,6 @@ import (
 	"watcher/processing"
 )
 
-/*type Config struct {
-	WatchDir      string        `mapstructure:"watchdir"`
-	FilePatterns  []string      `mapstructure:"filePatterns"`
-	MaxGoroutines int           `mapstructure:"maxGoroutines"`
-	ProcessDelay  time.Duration `mapstructure:"processDelay"`
-}*/
-
 var cfg config.Config
 var configMutex sync.RWMutex
 var semaphore chan struct{} // Семафор для ограничения параллельных обработчиков
