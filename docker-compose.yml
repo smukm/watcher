@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    container_name: watcher
+    volumes:
+      - ./configs:/app/configs
+      - ./watchdir:/app/watchdir  # Монтируем папку с файлами
+    depends_on:
+      - headless-chrome
+  headless-chrome:
+    container_name: headless-chrome
+    image: chromedp/headless-shell
+    volumes:
+      - ./watchdir:/watchdir  # Та же папка монтируется в Chrome
+    ports:
+    - "9222:9222"

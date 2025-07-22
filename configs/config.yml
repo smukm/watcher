@@ -1,0 +1,7 @@
+watchdir: ./watchdir
+filePatterns:
+  - "*.htm"
+  - "*.html"
+  - "*.csv"
+maxGoroutines: 4
+processDelay: 2
