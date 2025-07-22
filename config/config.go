@@ -7,4 +7,5 @@ type Config struct {
 	FilePatterns  []string      `mapstructure:"filePatterns"`
 	MaxGoroutines int           `mapstructure:"maxGoroutines"`
 	ProcessDelay  time.Duration `mapstructure:"processDelay"`
+	ChromeUrl     string        `envconfig:"CHROME_URL" required:"true"`
 }

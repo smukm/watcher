@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/fsnotify/fsnotify"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -292,6 +293,11 @@ func initConfig() error {
 		newConfig.ProcessDelay = 1 * time.Second
 	} else {
 		newConfig.ProcessDelay = newConfig.ProcessDelay * time.Second
+	}
+
+	err := envconfig.Process("", &newConfig)
+	if err != nil {
+		return err
 	}
 
 	configMutex.Lock()

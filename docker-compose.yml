@@ -2,6 +2,8 @@ services:
   app:
     build: .
     container_name: watcher
+    environment:
+      CHROME_URL: ${CHROME_URL}
     volumes:
       - ./configs:/app/configs
       - ./watchdir:/app/watchdir  # Монтируем папку с файлами

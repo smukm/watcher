@@ -28,14 +28,9 @@ func (h *Html) Execute(filePath string) {
 	start := time.Now()
 	h.logger.Printf("Начало обработки файла: %s", filePath)
 
-	info, err := os.Stat(filePath)
-	if err != nil {
-		h.logger.Printf("Ошибка при получении информации о файле %s: %v", filePath, err)
-		return
-	}
-
 	// Создаем контекст для удаленного Chrome
-	allocCtx, cancel := chromedp.NewRemoteAllocator(context.Background(), "ws://headless-chrome:9222")
+	allocCtx, cancel := chromedp.NewRemoteAllocator(context.Background(),
+		h.config.ChromeUrl)
 	defer cancel()
 
 	ctx, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(h.logger.Printf))
@@ -48,31 +43,30 @@ func (h *Html) Execute(filePath string) {
 	h.logger.Info().Msgf("Открываем локальный файл: %s", localURL)
 
 	// Устанавливаем таймаут
-	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
+	ctx, cancel = context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	// Делаем скриншот
 	if err := chromedp.Run(ctx, h.fullScreenshot(localURL, 90, &buf)); err != nil {
-		h.logger.Fatal().Err(err).Msg("Ошибка при создании скриншота")
+		h.logger.Error().Err(err).Msg("Ошибка при создании скриншота")
 	}
 
 	if len(buf) == 0 {
-		h.logger.Fatal().Msg("Скриншот не содержит данных")
+		h.logger.Error().Msg("Скриншот не содержит данных")
 	}
 
 	outputPath := filepath.Join(filepath.Dir(filePath), "screenshot.png")
 	if err := os.WriteFile(outputPath, buf, 0644); err != nil {
-		h.logger.Fatal().Err(err).Msg("Ошибка сохранения скриншота")
+		h.logger.Error().Err(err).Msg("Ошибка сохранения скриншота")
 	}
 
-	h.logger.Info().Msgf("Файл обработан: %s (размер: %d байт, время: %v)",
-		filepath.Base(filePath), info.Size(), time.Since(start))
+	h.logger.Info().Msgf("Файл обработан: %s (время: %v)",
+		filepath.Base(filePath), time.Since(start))
 }
 
 func (h *Html) fullScreenshot(urlstr string, quality int, res *[]byte) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.Navigate(urlstr),
-		chromedp.Sleep(2 * time.Second),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			// Получаем размеры страницы
 			var width, height int64
