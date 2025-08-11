@@ -37,9 +37,18 @@ func (h *Html) Execute(filePath string) {
 	defer cancel()
 
 	var buf []byte
-	// Преобразуем путь к формату внутри контейнера
-	inContainerPath := filepath.Join(h.config.WatchDir, filepath.Base(filePath))
-	localURL := "file://" + filepath.ToSlash(inContainerPath)
+	// Get relative path from watch directory
+	relPath, err := filepath.Rel(h.config.WatchDir, filePath)
+	if err != nil {
+		h.logger.Error().Err(err).Msg("Failed to get relative path")
+		return
+	}
+
+	// Construct the path as it appears in the Chrome container
+	chromePath := filepath.Join("/watchdir", relPath)
+	localURL := "file://" + filepath.ToSlash(chromePath)
+
+	h.logger.Debug().Msgf("Attempting to load URL: %s", localURL)
 
 	// Устанавливаем таймаут
 	ctx, cancel = context.WithTimeout(ctx, 60*time.Second)
