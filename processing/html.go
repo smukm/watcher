@@ -38,14 +38,14 @@ func (h *Html) Execute(filePath string) {
 	defer cancel()
 
 	var buf []byte
-	// Get relative path from watch directory
+
 	relPath, err := filepath.Rel(h.config.WatchDir, filePath)
 	if err != nil {
 		h.logger.Error().Err(err).Msg("Failed to get relative path")
 		return
 	}
 
-	// Construct the path as it appears in the Chrome container
+	// путь к файлу для хрома
 	chromePath := filepath.Join("/watchdir", relPath)
 	localURL := "file://" + filepath.ToSlash(chromePath)
 
