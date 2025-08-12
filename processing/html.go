@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 	"watcher/config"
 
@@ -63,7 +64,9 @@ func (h *Html) Execute(filePath string) {
 		h.logger.Error().Msg("Screenshot empty")
 	}
 
-	outputPath := filepath.Join(filepath.Dir(filePath), "screenshot.png")
+	outputFile := filepath.Base(filePath)
+	outputFile = strings.TrimSuffix(outputFile, filepath.Ext(outputFile))
+	outputPath := filepath.Join(filepath.Dir(filePath), outputFile+".png")
 	if err := os.WriteFile(outputPath, buf, 0644); err != nil {
 		h.logger.Error().Err(err).Msg("Screenshot saving error")
 	}
